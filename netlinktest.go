@@ -35,8 +35,12 @@ func attachToBridge(link netlink.Link, bridge *netlink.Bridge) {
 	lb := getMAC("Post-LinkSetMaster", link)
 	bb := getMAC("Post-LinkSetMaster", bridge)
 
+	// The bridge is assumed to change its MAC, see:
+	// - https://backreference.org/2010/07/28/linux-bridge-mac-addresses-and-dynamic-ports/
+	// - https://lists.linuxfoundation.org/pipermail/bridge/2010-May/007204.html
+
+	// Check if the MAC of the given link has changed
 	checkChanged(link.Attrs().Name, la, lb)
-	checkChanged(bridge.Name, ba, bb)
 
 	checkDuplicate(lb, bb)
 }
