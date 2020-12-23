@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
+	"net"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
-	"net"
 )
 
 func main() {
@@ -58,8 +60,27 @@ func createTAPAdapter(tapName string) (*netlink.Tuntap, error) {
 func createBridge(bridgeName string) (*netlink.Bridge, error) {
 	la := netlink.NewLinkAttrs()
 	la.Name = bridgeName
+	// Assign a mac to the bridge - if we don't do this it will take the lowest address
+	mac, err := randomMAC()
+	if err != nil {
+		return nil, err
+	}
+	la.HardwareAddr = mac
 	bridge := &netlink.Bridge{LinkAttrs: la}
 	return bridge, addLink(bridge)
+}
+
+func randomMAC() (net.HardwareAddr, error) {
+	mac := make([]byte, 6)
+	if _, err := rand.Read(mac); err != nil {
+		return nil, err
+	}
+
+	// In the first byte of the MAC, the 'multicast' bit should be
+	// clear and 'locally administered' bit should be set.
+	mac[0] = (mac[0] & 0xFE) | 0x02
+
+	return net.HardwareAddr(mac), nil
 }
 
 func addLink(link netlink.Link) (err error) {
