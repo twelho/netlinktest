@@ -39,7 +39,7 @@ func attachToBridge(link netlink.Link, bridge *netlink.Bridge) {
 	// - https://backreference.org/2010/07/28/linux-bridge-mac-addresses-and-dynamic-ports/
 	// - https://lists.linuxfoundation.org/pipermail/bridge/2010-May/007204.html
 
-	// Check if the MAC of the given link has changed
+	// Check if the MAC of the given link has changed, this is not expected
 	checkChanged(link.Attrs().Name, la, lb)
 
 	checkDuplicate(lb, bb)
@@ -90,7 +90,7 @@ func checkChanged(name string, a, b net.HardwareAddr) {
 
 func checkDuplicate(a, b net.HardwareAddr) {
 	if bytes.Equal(a, b) {
-		log.Errorf("Duplicate MAC address: %s", a)
+		log.Infof("Expected duplicate MAC address: %s", a)
 	}
 }
 
